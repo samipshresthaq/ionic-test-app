@@ -19,6 +19,7 @@ export class PlaceDetailPage implements OnInit {
 
   onBookPlace(){
     // this.router.navigateByUrl('/places/tabs/discover');
+    // this.navCtrl.pop(); not effective when no navigatation history
     this.navCtrl.navigateBack('/places/tabs/discover');
   }
 
