@@ -7,14 +7,14 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content class="ion-padding">
   <ion-segment (ionChange)="onFilterUpdate($event)">
     <ion-segment-button value="all" checked>All Places</ion-segment-button>
     <ion-segment-button value="bookable">Bookable Places</ion-segment-button>
   </ion-segment>
   <ion-grid>
     <ion-row>
-      <ion-col [size]="12" [sizeSm]="8" [offsetSm]="2" text-center>
+      <ion-col [size]="12" [sizeSm]="8" [offsetSm]="2" class="ion-text-center">
         <ion-card>
           <ion-card-header>
             <ion-card-title> {{ loadedPlaces[0].title }} </ion-card-title>

@@ -1,5 +1,5 @@
 <ion-app>
-  <ion-menu side="start" menuId="mainMenu" type="push">
+  <ion-menu side="start" contentId="main" menuId="mainMenu" type="push">
     <ion-header>
       <ion-toolbar>
         <ion-title>
@@ -8,7 +8,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-menu-toggle menu="mainMenu">
+      <ion-menu-toggle id="mainMenu">
         <ion-list>
           <ion-item lines="none" [routerLink]="['places']">
             <ion-icon name="airplane" slot="start"></ion-icon>
@@ -26,5 +26,5 @@
       </ion-menu-toggle>
     </ion-content>
   </ion-menu>
-  <ion-router-outlet main></ion-router-outlet>
+  <ion-router-outlet id="main"></ion-router-outlet>
 </ion-app>
