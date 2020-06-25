@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { timer } from 'rxjs';
 
@@ -12,6 +13,7 @@ import { AuthService } from './auth.service';
 })
 export class AuthPage implements OnInit {
   isLoading = false;
+  isLoginMode = true;
 
   constructor(
     private authService: AuthService,
@@ -40,6 +42,14 @@ export class AuthPage implements OnInit {
           this.router.navigateByUrl('/places');
         });
       });
+  }
+
+  onSwitchLoginMode(){
+    this.isLoginMode = !this.isLoginMode;
+  }
+
+  onSubmit(form: NgForm) {
+    console.log(form);
   }
 
 }
