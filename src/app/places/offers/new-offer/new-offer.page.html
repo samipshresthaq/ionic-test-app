@@ -12,14 +12,14 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content class="ion-padding">
   <form [formGroup]="form">
     <ion-grid>
       <ion-row>
         <ion-col size-sm="6" offset-sm="3">
           <ion-item>
             <ion-label position="stacked" autofocus="true">Title</ion-label>
-            <ion-input formControlName="title" type="text" required autocomplete autocorrect></ion-input>
+            <ion-input formControlName="title" type="text" autocomplete autocorrect></ion-input>
           </ion-item>
         </ion-col>
       </ion-row>
@@ -27,7 +27,7 @@
         <ion-col size-sm="6" offset-sm="3">
           <ion-item>
             <ion-label position="stacked">Short Description</ion-label>
-            <ion-textarea formControlName="description" type="text" rows="3" required autocomplete autocorrect></ion-textarea>
+            <ion-textarea formControlName="description" rows="3" autocomplete autocorrect></ion-textarea>
           </ion-item>
         </ion-col>
       </ion-row>
@@ -35,7 +35,7 @@
         <ion-col size-sm="6" offset-sm="3">
           <ion-item>
             <ion-label position="stacked">Price</ion-label>
-            <ion-input formControlName="price" type="number" required inputmode="decimal"></ion-input>
+            <ion-input formControlName="price" type="number" inputmode="decimal"></ion-input>
           </ion-item>
         </ion-col>
       </ion-row>
