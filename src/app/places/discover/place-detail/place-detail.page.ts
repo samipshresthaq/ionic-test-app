@@ -37,23 +37,23 @@ export class PlaceDetailPage implements OnInit {
     // this.navCtrl.pop(); not effective when no navigation history
     // this.navCtrl.navigateBack('/places/tabs/discover');
     this.actionSheetCtrl.create({
-      header: "Choose an action",
+      header: 'Choose an action',
       buttons: [
         {
-          text: "Select Date",
+          text: 'Select Date',
           handler: () => {
             this.openBookingModal('select');
           }
         },
         {
-          text: "Random Date",
+          text: 'Random Date',
           handler: () => {
             this.openBookingModal('random');
           }
         },
         {
-          text: "Cancel",
-          role: "cancel"
+          text: 'Cancel',
+          role: 'cancel'
         }
       ]
     }).then(actionEl => {
@@ -68,7 +68,7 @@ export class PlaceDetailPage implements OnInit {
       component: CreateBookingComponent,
       componentProps: {
         selectedPlace: this.place,
-        mode
+        selectedMode: mode
       }
     })
     .then(modelEl => {
