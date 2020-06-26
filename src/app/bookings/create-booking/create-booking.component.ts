@@ -41,7 +41,14 @@ export class CreateBookingComponent implements OnInit {
     if (form.invalid) {
       return;
     }
-    this.modalCtrl.dismiss({ message: 'Place Booked' }, 'confirm');
+
+    this.modalCtrl.dismiss({ bookingData: {
+        fullName: form.value['full-name'],
+        guestCount: form.value['guest-number'],
+        startDate: form.value['from-date'],
+        endDate: form.value['to-date'],
+      }
+    }, 'confirm');
   }
 
   onCancel() {
