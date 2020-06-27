@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { take, map, tap, delay } from 'rxjs/operators';
 
 import { AuthService } from '../auth/auth.service';
 
@@ -107,7 +107,7 @@ export class PlacesService {
     price: number,
     availableFrom: Date,
     availableTo: Date
-  ) {
+  ): Observable<Place[]> {
     const newPlace = new Place(
       `p${Math.round(Math.random() * 10).toString()}`,
       title,
@@ -120,9 +120,35 @@ export class PlacesService {
       this.authService.userId
     );
 
-    this.places.pipe(take(1)).subscribe(places => {
-      this._places.next(places.concat(newPlace));
-    });
+    return this.places.pipe(take(1), delay(1000), tap(places => {
+        this._places.next(places.concat(newPlace));
+    }));
 
+  }
+
+  updatePlace(
+    id: string,
+    title: string,
+    description: string,
+  ) {
+    return this.places.pipe(take(1), delay(1000), tap(places => {
+      const updatedPlaceIndex = places.findIndex(place => place.id === id);
+      const updatedPlaces = [...places];
+      const oldPlace = updatedPlaces[updatedPlaceIndex];
+
+      updatedPlaces[updatedPlaceIndex] = new Place(
+        oldPlace.id,
+        title,
+        oldPlace.location,
+        description,
+        oldPlace.image,
+        oldPlace.price,
+        oldPlace.availableFrom,
+        oldPlace.availableTo,
+        oldPlace.userId
+      );
+
+      this._places.next(updatedPlaces);
+    }));
   }
 }

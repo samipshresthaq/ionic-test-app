@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { NavController, LoadingController } from '@ionic/angular';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { PlacesService } from '../../places.service';
@@ -14,7 +14,8 @@ export class NewOfferPage implements OnInit {
 
   constructor(
     private navCtrl: NavController,
-    private placesService: PlacesService
+    private placesService: PlacesService,
+    private loadingCtrl: LoadingController
   ) { }
 
   ngOnInit() {
@@ -47,15 +48,25 @@ export class NewOfferPage implements OnInit {
       return;
     }
 
-    this.placesService.addPlace(
-      this.form.value.title,
-      'Nepal',
-      this.form.value.description,
-      +this.form.value.price,
-      new Date(this.form.value.fromDate),
-      new Date(this.form.value.toDate)
-    );
-    this.navCtrl.navigateBack('/places/tabs/offers');
+    this.loadingCtrl.create({
+      message: 'Adding offer...'
+    }).then(loadingEl => {
+      loadingEl.present();
+      // return loadingEl.onDidDismiss();
+      this.placesService.addPlace(
+        this.form.value.title,
+        'Nepal',
+        this.form.value.description,
+        +this.form.value.price,
+        new Date(this.form.value.fromDate),
+        new Date(this.form.value.toDate)
+      ).subscribe(() => {
+        loadingEl.dismiss();
+        this.form.reset();
+        this.navCtrl.navigateBack('/places/tabs/offers');
+      });
+    });
+
   }
 
   onAddOffer() {

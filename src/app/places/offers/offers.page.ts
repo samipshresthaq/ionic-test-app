@@ -1,10 +1,10 @@
 import { Router } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { IonItemSliding } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 
 import { PlacesService } from '../places.service';
 import { Place } from '../places.model';
-import { IonItemSliding } from '@ionic/angular';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-offers',
