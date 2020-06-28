@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { NavController, LoadingController } from '@ionic/angular';
+import { NavController, LoadingController, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
 import { PlacesService } from './../../places.service';
@@ -15,23 +15,28 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 export class EditOfferPage implements OnInit, OnDestroy {
   place: Place;
   form: FormGroup;
+  placeId: string;
+  isLoading = false;
   private placeSub: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private navCtrl: NavController,
     private placesService: PlacesService,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
+    this.isLoading = true;
     this.route.paramMap.subscribe((paramMap) => {
       if (!paramMap.has('placeId')) {
         this.navCtrl.navigateBack('/places/tabs/offers');
         return;
       }
+      this.placeId = paramMap.get('placeId');
       this.placeSub = this.placesService
-        .getPlace(paramMap.get('placeId'))
+        .getPlace(this.placeId)
         .subscribe((place) => {
           this.place = place;
           this.form = new FormGroup({
@@ -44,6 +49,22 @@ export class EditOfferPage implements OnInit, OnDestroy {
               validators: [Validators.required, Validators.maxLength(180)],
             }),
           });
+          this.isLoading = false;
+        }, err => {
+          this.alertCtrl.create({
+            header: 'An error occured!',
+            subHeader: 'Please try again later! Press ok to go back.',
+            buttons: [
+              {
+                text: 'Ok',
+                handler: () => {
+                  this.navCtrl.navigateBack('/places/tabs/offers');
+                }
+              }
+            ]
+          }).then(alertEl => {
+            alertEl.present();
+          })
         });
     });
   }

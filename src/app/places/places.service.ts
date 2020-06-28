@@ -1,50 +1,28 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { take, map, tap, delay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { take, map, tap, switchMap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 import { AuthService } from '../auth/auth.service';
 
 import { Place } from './places.model';
 
+interface PlaceData {
+  availableFrom: string;
+  availableTo: string;
+  description: string;
+  image: string;
+  location: string;
+  price: number;
+  title: string;
+  userId: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class PlacesService {
-  private _places = new BehaviorSubject<Place[]>([
-    new Place(
-      'p1',
-      'Basantapur',
-      'Kathmandu',
-      'This is capital',
-      'http://ecs.com.np/fckimage/article/images/2015/9/basantapur_2.jpg',
-      1200,
-      new Date('2020-01-01'),
-      new Date('2022-02-25'),
-      'abc'
-    ),
-    new Place(
-      'p2',
-      'Patan',
-      'Lalitpur',
-      'This is tourist place',
-      'https://www.wondermondo.com/wp-content/uploads/2017/10/PatanDurbarSquare.jpg?ezimgfmt=ng:webp/ngcb9',
-      1000,
-      new Date('2022-08-01'),
-      new Date('2022-11-11'),
-      'xyz'
-    ),
-    new Place(
-      'p3',
-      'Bhaktapur',
-      'Bhaktapur',
-      'This is another famous tourist place',
-      'http://www.holidaynepal.com/gallery/images/bhaktapur.jpg',
-      889,
-      new Date('2024-07-03'),
-      new Date('2025-07-03'),
-      'xyz'
-    ),
-  ]);
+  private _places = new BehaviorSubject<Place[]>([]);
 
   private _offers = new BehaviorSubject<Place[]>([
     new Place(
@@ -89,15 +67,57 @@ export class PlacesService {
   get offers(): Observable<Place[]> {
     return this._offers.asObservable();
   }
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private httpClient: HttpClient ) {}
 
-  getPlace(id: string): Observable<Place> {
-    return this.places.pipe(
-      take(1),
-      map(places => {
-        return { ...places.find((pl) => pl.id === id) };
+  fetchPlaces() {
+    return this.httpClient
+      .get<{ [key: string]: PlaceData }>(
+        'https://ionic-test-project-a7ef7.firebaseio.com/offered-places.json'
+      )
+      .pipe(map(res => {
+        const places = [];
+        Object.keys(res).forEach((key: string) => {
+          places.push(new Place(
+            key,
+            res[key].title,
+            res[key].location,
+            res[key].description,
+            res[key].image,
+            res[key].price,
+            new Date(res[key].availableFrom),
+            new Date(res[key].availableTo),
+            res[key].userId,
+          ));
+        });
+
+        return places;
+      }),
+      tap((places: Place[]) => this._places.next(places)));
+  }
+
+  getPlace(id: string) {
+    return this.httpClient.get<PlaceData>(`https://ionic-test-project-a7ef7.firebaseio.com/offered-places/${id}.json`)
+     .pipe(
+      map((res) => {
+        return new Place(
+          id,
+          res.title,
+          res.location,
+          res.description,
+          res.image,
+          res.price,
+          new Date(res.availableFrom),
+          new Date(res.availableTo),
+          res.userId,
+        );
       })
     );
+    //  this.places.pipe(
+    //   take(1),
+    //   map(places => {
+    //     return { ...places.find((pl) => pl.id === id) };
+    //   })
+    // );
   }
 
   addPlace(
@@ -107,7 +127,8 @@ export class PlacesService {
     price: number,
     availableFrom: Date,
     availableTo: Date
-  ): Observable<Place[]> {
+  ) {
+    let generatedId: string;
     const newPlace = new Place(
       `p${Math.round(Math.random() * 10).toString()}`,
       title,
@@ -120,9 +141,24 @@ export class PlacesService {
       this.authService.userId
     );
 
-    return this.places.pipe(take(1), delay(1000), tap(places => {
+    return this.httpClient.post<{name: string}>(
+      'https://ionic-test-project-a7ef7.firebaseio.com/offered-places.json',
+      { ...newPlace, id: null }
+    ).pipe(
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.places;
+      }),
+      take(1),
+      tap(places => {
+        newPlace.id = generatedId;
         this._places.next(places.concat(newPlace));
-    }));
+      })
+    );
+
+    // return this.places.pipe(take(1), delay(1000), tap(places => {
+    //     this._places.next(places.concat(newPlace));
+    // }));
 
   }
 
@@ -131,9 +167,18 @@ export class PlacesService {
     title: string,
     description: string,
   ) {
-    return this.places.pipe(take(1), delay(1000), tap(places => {
+    let updatedPlaces: Place[];
+    return this.places.pipe(take(1),
+    switchMap(places => {
+      if (!places || !places.length) {
+        return this.fetchPlaces();
+      } else {
+        return of(places);
+      }
+    }),
+    switchMap(places => {
       const updatedPlaceIndex = places.findIndex(place => place.id === id);
-      const updatedPlaces = [...places];
+      updatedPlaces = [...places];
       const oldPlace = updatedPlaces[updatedPlaceIndex];
 
       updatedPlaces[updatedPlaceIndex] = new Place(
@@ -148,7 +193,23 @@ export class PlacesService {
         oldPlace.userId
       );
 
+      return this.httpClient.put(`https://ionic-test-project-a7ef7.firebaseio.com/offered-places/${id}.json`,
+      {...updatedPlaces[updatedPlaceIndex], id: null});
+
+    }), tap(() => {
       this._places.next(updatedPlaces);
     }));
+  }
+
+  deletePlace(placeId: string) {
+    let updatedPlaces: Place[];
+    return this.places.pipe(take(1), switchMap(places => {
+        updatedPlaces = places.filter(place => place.id !== placeId);
+
+        return this.httpClient.delete(`https://ionic-test-project-a7ef7.firebaseio.com/offered-places/${placeId}.json`);
+      }), tap(() => {
+        this._places.next(updatedPlaces);
+      })
+    );
   }
 }

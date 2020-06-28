@@ -13,7 +13,11 @@
     <ion-segment-button value="bookable">Bookable Places</ion-segment-button>
   </ion-segment>
 
-  <ng-template #emptyContainer>
+  <div class="ion-text-center" *ngIf="isLoading">
+    <ion-spinner color="primary"></ion-spinner>
+  </div>
+
+  <ng-template *ngIf="!isLoading && !filteredPlaces.length">
     <ion-grid style="height: 70vh">
       <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
         <ion-col size-sm="6" offset-sm="3" class="ion-text-center ion-align-self-center">
@@ -23,7 +27,7 @@
     </ion-grid>
   </ng-template>
 
-  <ion-grid *ngIf="filteredPlaces && filteredPlaces.length; else emptyContainer">
+  <ion-grid *ngIf="!isLoading && filteredPlaces && filteredPlaces.length">
     <ion-row>
       <ion-col [size]="12" [sizeSm]="8" [offsetSm]="2" class="ion-text-center">
         <ion-card>
