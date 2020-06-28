@@ -9,12 +9,15 @@
 
 <ion-content>
   <ion-grid>
-    <ion-row>
+    <ion-row *ngIf="loadedBooking && loadedBooking.length; else emptyContainer">
       <ion-col [sizeMd]="6" [offsetMd]="3">
         <ion-item-sliding *ngFor="let booking of loadedBooking" #bookingSlider>
           <ion-item>
+            <ion-thumbnail slot="start">
+              <ion-img [src]="booking.placeImage"></ion-img>
+            </ion-thumbnail>
             <ion-label>
-              <h5>{{ booking.placeTitle }}</h5>
+              <h2>{{ booking.placeTitle }}</h2>
               <p>Guests: {{ booking.guestNumber }}</p>
             </ion-label>
           </ion-item>
@@ -26,6 +29,16 @@
         </ion-item-sliding>
       </ion-col>
     </ion-row>
+
+    <ng-template #emptyContainer>
+      <ion-grid style="height: 70vh">
+        <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%">
+          <ion-col size-sm="6" offset-sm="3" class="ion-text-center ion-align-self-center">
+            <p>You have no bookings. Try booking some place!!! </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ng-template>
   </ion-grid>
   <ion-list>
   </ion-list>
