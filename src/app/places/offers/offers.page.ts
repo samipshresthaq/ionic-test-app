@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonItemSliding, LoadingController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
+import { AuthService } from 'src/app/auth/auth.service';
 import { PlacesService } from '../places.service';
 import { Place } from '../places.model';
 
@@ -14,15 +15,18 @@ import { Place } from '../places.model';
 export class OffersPage implements OnInit, OnDestroy {
   loadedOffers: Place[];
   isLoading = false;
+  userId: string;
   private placesSubs: Subscription;
 
   constructor(
     private placesService: PlacesService,
     private router: Router,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
+    this.userId = this.authService.userId;
     this.placesSubs = this.placesService.places.subscribe(places => this.loadedOffers = places);
   }
 

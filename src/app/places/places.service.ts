@@ -76,19 +76,21 @@ export class PlacesService {
       )
       .pipe(map(res => {
         const places = [];
-        Object.keys(res).forEach((key: string) => {
-          places.push(new Place(
-            key,
-            res[key].title,
-            res[key].location,
-            res[key].description,
-            res[key].image,
-            res[key].price,
-            new Date(res[key].availableFrom),
-            new Date(res[key].availableTo),
-            res[key].userId,
-          ));
-        });
+        if (res) {
+          Object.keys(res).forEach((key: string) => {
+            places.push(new Place(
+              key,
+              res[key].title,
+              res[key].location,
+              res[key].description,
+              res[key].image,
+              res[key].price,
+              new Date(res[key].availableFrom),
+              new Date(res[key].availableTo),
+              res[key].userId,
+            ));
+          });
+        }
 
         return places;
       }),
@@ -205,7 +207,6 @@ export class PlacesService {
     let updatedPlaces: Place[];
     return this.places.pipe(take(1), switchMap(places => {
         updatedPlaces = places.filter(place => place.id !== placeId);
-
         return this.httpClient.delete(`https://ionic-test-project-a7ef7.firebaseio.com/offered-places/${placeId}.json`);
       }), tap(() => {
         this._places.next(updatedPlaces);

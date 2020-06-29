@@ -24,7 +24,7 @@
           <ion-button color="primary" [routerLink]="['new']">Add New Offer</ion-button>
         </div>
         <ion-list *ngIf="!isLoading && loadedOffers.length">
-          <ion-item-sliding *ngFor="let offer of loadedOffers" #slidingItem>
+          <ion-item-sliding *ngFor="let offer of loadedOffers" #slidingItem [disabled]="userId !== offer.userId">
             <app-offer-item [offer]="offer"></app-offer-item>
             <ion-item-options>
               <ion-item-option color="primary" (click)="onEdit(offer.id, slidingItem)">
