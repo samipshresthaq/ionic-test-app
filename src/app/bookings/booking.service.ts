@@ -32,7 +32,11 @@ export class BookingService {
 
   fetchBookings() {
     return this.authService.userId.pipe(take(1), switchMap(userId => {
-     return this.httpClient
+      if (!userId) {
+        throw new Error('User not found');
+      }
+
+      return this.httpClient
       .get<{ [key: string]: BookData }>(
         `https://ionic-test-project-a7ef7.firebaseio.com/bookings.json?orderBy="userId"&equaltTo="${ userId }"`
       )

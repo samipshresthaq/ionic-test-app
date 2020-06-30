@@ -28,11 +28,11 @@ export class OffersPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.authService.userId.pipe(take(1))
-    .subscribe(userId => {
-      if (!userId) {
+    .subscribe(uId => {
+      if (!uId) {
         throw new Error('User not found');
       }
-      this.userId = userId;
+      this.userId = uId;
       this.placesSubs = this.placesService.places.subscribe(places => this.loadedOffers = places);
     });
   }
@@ -40,8 +40,8 @@ export class OffersPage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.isLoading = true;
     this.placesService.fetchPlaces().subscribe((places) => {
-      this.isLoading = false;
       this.loadedOffers = places;
+      this.isLoading = false;
     });
   }
 

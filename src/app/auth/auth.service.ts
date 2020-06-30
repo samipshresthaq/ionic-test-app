@@ -33,7 +33,7 @@ export class AuthService {
 
   get userId(): Observable<string> {
     return this._user.asObservable().pipe(map(user => {
-      if (user) {
+      if (!user) {
         return null;
       }
       return user.id;
