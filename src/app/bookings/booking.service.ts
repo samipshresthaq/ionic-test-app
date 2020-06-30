@@ -31,9 +31,10 @@ export class BookingService {
   constructor(private authService: AuthService, private httpClient: HttpClient) {}
 
   fetchBookings() {
-    return this.httpClient
+    return this.authService.userId.pipe(take(1), switchMap(userId => {
+     return this.httpClient
       .get<{ [key: string]: BookData }>(
-        `https://ionic-test-project-a7ef7.firebaseio.com/bookings.json?orderBy="userId"&equaltTo="${this.authService.userId }"`
+        `https://ionic-test-project-a7ef7.firebaseio.com/bookings.json?orderBy="userId"&equaltTo="${ userId }"`
       )
       .pipe(
         map((res) => {
@@ -63,6 +64,7 @@ export class BookingService {
           this._bookings.next(bookings);
         })
       );
+      }));
   }
 
   addBooking(
@@ -76,29 +78,41 @@ export class BookingService {
     toDate: Date
   ) {
     let generatedId: string;
-    const newBooking = new Booking(
-      Math.random().toString(),
-      placeId,
-      firstName,
-      lastName,
-      this.authService.userId,
-      placeTitle,
-      placeImage,
-      guestNumber,
-      fromDate,
-      toDate
-    );
+    let newBooking: Booking;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(
+      (userId) => {
+        if (!userId) {
+          throw new Error('No login data found');
+        }
+        newBooking = new Booking(
+          Math.random().toString(),
+          placeId,
+          firstName,
+          lastName,
+          userId,
+          placeTitle,
+          placeImage,
+          guestNumber,
+          fromDate,
+          toDate
+        );
 
-    return this.httpClient.post<{name: string}>('https://ionic-test-project-a7ef7.firebaseio.com/bookings.json',
-    { ...newBooking, id: null }).pipe(switchMap(resData => {
-      generatedId = resData.name;
-      return this.bookings;
-    }),
-    take(1),
-    tap(bookings => {
-      newBooking.id = generatedId;
-      this._bookings.next(bookings.concat(newBooking));
-    }));
+        return this.httpClient.post<{name: string}>(
+        'https://ionic-test-project-a7ef7.firebaseio.com/bookings.json',
+        { ...newBooking, id: null });
+      }),
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.bookings;
+      }),
+      take(1),
+      tap(bookings => {
+        newBooking.id = generatedId;
+        this._bookings.next(bookings.concat(newBooking));
+      })
+    );
 
     // return this.bookings.pipe(
     //   take(1),

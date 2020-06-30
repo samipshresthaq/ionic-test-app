@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 
 import { PlacesService } from '../places.service';
 import { Place } from '../places.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-discover',
@@ -27,14 +28,16 @@ export class DiscoverPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.placesSubs = this.placesService.places.subscribe(places => {
-      this.loadedPlaces = places;
+      this.authService.userId.pipe(take(1)).subscribe(userId => {
+        this.loadedPlaces = places;
 
-      if (this.currentFilter === 'all' ) {
-        this.filteredPlaces = this.loadedPlaces;
-      } else {
-        this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== this.authService.userId);
-      }
-      this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+        if (this.currentFilter === 'all' ) {
+          this.filteredPlaces = this.loadedPlaces;
+        } else {
+          this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== userId);
+        }
+        this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+      });
     });
   }
 
@@ -43,23 +46,27 @@ export class DiscoverPage implements OnInit, OnDestroy {
     this.placesService.fetchPlaces().subscribe((places) => {
       this.isLoading = false;
       this.loadedPlaces = places;
-      if (this.currentFilter === 'all' ) {
-        this.filteredPlaces = this.loadedPlaces;
-      } else {
-        this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== this.authService.userId);
-      }
-      this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+      this.authService.userId.pipe(take(1)).subscribe(userId => {
+        if (this.currentFilter === 'all' ) {
+          this.filteredPlaces = this.loadedPlaces;
+        } else {
+          this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== userId);
+        }
+        this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+      });
     });
   }
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
     this.currentFilter = event.detail.value;
-    if (event.detail.value === 'all' ) {
-      this.filteredPlaces = this.loadedPlaces;
-    } else {
-      this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== this.authService.userId);
-    }
-    this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+    this.authService.userId.pipe(take(1)).subscribe(userId => {
+      if (event.detail.value === 'all' ) {
+        this.filteredPlaces = this.loadedPlaces;
+      } else {
+        this.filteredPlaces = this.loadedPlaces.filter(place => place.userId !== userId);
+      }
+      this.listedLoadedPlaces = this.filteredPlaces.slice(1);
+    });
   }
 
   ngOnDestroy() {

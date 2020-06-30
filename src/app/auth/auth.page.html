@@ -30,7 +30,7 @@
         <ion-col size-sm="6" offset-sm="3">
           <!-- <ion-spinner color="secondary" *ngIf="isLoading"></ion-spinner> -->
           <ion-button type="button" color="primary" fill="clear" expand="full" (click)="onSwitchLoginMode()">Switch to {{isLoginMode? "Signup": "Login"}}</ion-button>
-          <ion-button [disabled]="loginForm.invalid"  type="submit" color="primary" (click)="onLogin()" expand="block">Login</ion-button>
+          <ion-button [disabled]="loginForm.invalid"  type="submit" color="primary" expand="block">{{isLoginMode? "Login": "Signup"}}</ion-button>
         </ion-col>
       </ion-row>
     </ion-grid>

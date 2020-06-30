@@ -6,6 +6,7 @@ import { BookingService } from './booking.service';
 import { AuthService } from '../auth/auth.service';
 
 import { Booking } from './booking.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-bookings',
@@ -31,8 +32,10 @@ export class BookingsPage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.isLoading = true;
     this.bookingService.fetchBookings().subscribe(bookings => {
-      this.loadedBooking = bookings.filter(booking => booking.userId === this.authService.userId);
-      this.isLoading = false;
+      this.authService.userId.pipe(take(1)).subscribe(userId => {
+        this.loadedBooking = bookings.filter(booking => booking.userId === userId);
+        this.isLoading = false;
+      });
     });
   }
 

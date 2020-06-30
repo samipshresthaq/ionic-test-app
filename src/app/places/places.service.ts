@@ -131,22 +131,30 @@ export class PlacesService {
     availableTo: Date
   ) {
     let generatedId: string;
-    const newPlace = new Place(
-      `p${Math.round(Math.random() * 10).toString()}`,
-      title,
-      location,
-      description,
-      'https://omgnepal.com/wp-content/uploads/2018/07/0006-1469162707.png',
-      price,
-      availableFrom,
-      availableTo,
-      this.authService.userId
-    );
+    let newPlace: Place;
 
-    return this.httpClient.post<{name: string}>(
-      'https://ionic-test-project-a7ef7.firebaseio.com/offered-places.json',
-      { ...newPlace, id: null }
-    ).pipe(
+    return this.authService.userId.pipe(take(1), switchMap(userId => {
+      if (!userId) {
+        throw new Error('User not found');
+      }
+
+      newPlace = new Place(
+        `p${Math.round(Math.random() * 10).toString()}`,
+        title,
+        location,
+        description,
+        'https://omgnepal.com/wp-content/uploads/2018/07/0006-1469162707.png',
+        price,
+        availableFrom,
+        availableTo,
+        userId
+      );
+
+      return this.httpClient.post<{name: string}>(
+        'https://ionic-test-project-a7ef7.firebaseio.com/offered-places.json',
+        { ...newPlace, id: null }
+      );
+    }),
       switchMap(resData => {
         generatedId = resData.name;
         return this.places;

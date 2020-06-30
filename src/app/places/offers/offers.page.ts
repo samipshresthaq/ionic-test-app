@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { PlacesService } from '../places.service';
 import { Place } from '../places.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-offers',
@@ -26,8 +27,14 @@ export class OffersPage implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.userId = this.authService.userId;
-    this.placesSubs = this.placesService.places.subscribe(places => this.loadedOffers = places);
+    this.authService.userId.pipe(take(1))
+    .subscribe(userId => {
+      if (!userId) {
+        throw new Error('User not found');
+      }
+      this.userId = userId;
+      this.placesSubs = this.placesService.places.subscribe(places => this.loadedOffers = places);
+    });
   }
 
   ionViewWillEnter() {
